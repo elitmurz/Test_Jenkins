@@ -1,17 +1,15 @@
-import driver
 import pytest
-from selene.core._browser import Browser
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selene import browser, Config, Browser
+from selene import Browser, Config
 
+from utils import attach
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def setup_browser(request):
-    from selenium import webdriver
-
-    capabilities = {
+    options = Options()
+    selenoid_capabilities = {
         "browserName": "chrome",
         "browserVersion": "127.0",
         "selenoid:options": {
@@ -19,10 +17,18 @@ def setup_browser(request):
             "enableVideo": True
         }
     }
-
+    options.capabilities.update(selenoid_capabilities)
     driver = webdriver.Remote(
-        command_executor="https://selenoid.autotests.cloud/wd/hub",
-        desired_capabilities=capabilities)
+        command_executor=f"https://user1:1234@selenoid.autotests.cloud/wd/hub",
+        options=options
+    )
 
-    browser: Browser= Browser(Config(driver))
+    browser = Browser(Config(driver))
     yield browser
+
+    attach.add_screenshot(browser)
+    attach.add_logs(browser)
+    attach.add_html(browser)
+    attach.add_video(browser)
+
+    browser.quit()
