@@ -1,44 +1,11 @@
-import pytest
-from allure_commons._allure import attach
-from driver import driver
-from selene import browser, Browser, Config
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 import allure
+from allure_commons._allure import attach
 from allure_commons.types import AttachmentType
+from driver import driver
+from selene import Browser, Config
 
 
-@pytest.fixture(scope='function')
-def setup_browser():
-    options = Options()
-    selenoid_capabilities = {
-        "browserName": "chrome",
-        "browserVersion": "127.0",
-        "selenoid:options": {
-            "enableVNC": True,
-            "enableVideo": True
-        }
-    }
-    options.capabilities.update(selenoid_capabilities)
 
-    driver = webdriver.Remote(
-        command_executor="https://user1:1234@selenoid.autotests.cloud/wd/hub",
-        options=options
-    )
-
-    browser.config.driver = driver
-    browser.config.base_url = "https://demoqa.com"
-    browser.config.window_width = 1920
-    browser.config.window_height = 1080
-    browser.config.timeout = 10.0
-
-    yield browser
-
-    # Добавляем скриншот при падении
-    add_screenshot(browser)
-    add_html(browser)
-
-    browser.quit()
 
 
 def add_screenshot(browser):
